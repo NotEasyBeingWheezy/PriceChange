@@ -7,18 +7,189 @@
     "process_delay_seconds": 1
   },
   "folder_paths": {
-    "windows": "C:\\Users\\Freddieharris\\Desktop\\Bulk Replace Test",
+    "windows": "C:\\Users\\FreddieHarris\\PriceTest",
     "mac": "/Users/freddieharris/Downloads/untitled folder",
     "linux": "/path/to/excel/files"
   },
   "search_and_update_rules": [
     {
-      "name": "Update prices in Standard Cricket Products",
+      "name": "Update prices for E Line Titanium Helmet",
+      "sheet_name": "Std Cricket Products Upload",
+      "search_column": "M",
+      "search_value": "MASELT",
+      "update_column": "S",
+      "target_value": "205",
+      "enabled": true
+    },
+    {
+      "name": "Update prices for T Line Titanium Helmet",
+      "sheet_name": "Std Cricket Products Upload",
+      "search_column": "M",
+      "search_value": "MASTLT",
+      "update_column": "S",
+      "target_value": "170",
+      "enabled": true
+    },
+    {
+      "name": "Update prices for T Line Steel Helmet",
+      "sheet_name": "Std Cricket Products Upload",
+      "search_column": "M",
+      "search_value": "MASTLS",
+      "update_column": "S",
+      "target_value": "109",
+      "enabled": true
+    },
+    {
+      "name": "Update prices for T Line Steel Junior Helmet",
+      "sheet_name": "Std Cricket Products Upload",
+      "search_column": "M",
+      "search_value": "MASTLSJR",
+      "update_column": "S",
+      "target_value": "85",
+      "enabled": true
+    },
+    {
+      "name": "Update prices for StemGuard",
+      "sheet_name": "Std Cricket Products Upload",
+      "search_column": "M",
+      "search_value": "MASMSTEM",
+      "update_column": "S",
+      "target_value": "45",
+      "enabled": true
+    },
+    {
+      "name": "Update prices for StemGuard Lite",
+      "sheet_name": "Std Cricket Products Upload",
+      "search_column": "M",
+      "search_value": "MASMSTML",
+      "update_column": "S",
+      "target_value": "30",
+      "enabled": true
+    },
+    {
+      "name": "Update prices for E Line Pro Batting Gloves",
       "sheet_name": "Std Cricket Products Upload",
       "search_column": "M",
       "search_value": "MASELBGP",
       "update_column": "S",
-      "target_value": "1000",
+      "target_value": "105",
+      "enabled": true
+    },
+    {
+      "name": "Update prices for E Line Batting Gloves",
+      "sheet_name": "Std Cricket Products Upload",
+      "search_column": "M",
+      "search_value": "MASELBG",
+      "update_column": "S",
+      "target_value": "99",
+      "enabled": true
+    },
+    {
+      "name": "Update prices for E Line Junior Batting Gloves",
+      "sheet_name": "Std Cricket Products Upload",
+      "search_column": "M",
+      "search_value": "MASELBGJ",
+      "update_column": "S",
+      "target_value": "50",
+      "enabled": true
+    },
+    {
+      "name": "Update prices for T Line Batting Gloves",
+      "sheet_name": "Std Cricket Products Upload",
+      "search_column": "M",
+      "search_value": "MASTLBG",
+      "update_column": "S",
+      "target_value": "69",
+      "enabled": true
+    },
+    {
+      "name": "Update prices for C Line Batting Gloves",
+      "sheet_name": "Std Cricket Products Upload",
+      "search_column": "M",
+      "search_value": "MASCLBG",
+      "update_column": "S",
+      "target_value": "50",
+      "enabled": true
+    },
+    {
+      "name": "Update prices for E Line Thigh Pad",
+      "sheet_name": "Std Cricket Products Upload",
+      "search_column": "M",
+      "search_value": "MASELTP",
+      "update_column": "S",
+      "target_value": "50",
+      "enabled": true
+    },
+    {
+      "name": "Update prices for T Line Thigh Pad Junior",
+      "sheet_name": "Std Cricket Products Upload",
+      "search_column": "M",
+      "search_value": "MASTLTPJ",
+      "update_column": "S",
+      "target_value": "36",
+      "enabled": true
+    },
+    {
+      "name": "Update prices for E Line Batting Pads",
+      "sheet_name": "Std Cricket Products Upload",
+      "search_column": "M",
+      "search_value": "MASELBP",
+      "update_column": "S",
+      "target_value": "140",
+      "enabled": true
+    },
+    {
+      "name": "Update prices for E Line Junior Batting Pads",
+      "sheet_name": "Std Cricket Products Upload",
+      "search_column": "M",
+      "search_value": "MASELBP",
+      "update_column": "S",
+      "target_value": "70",
+      "enabled": true
+    },
+    {
+      "name": "Update prices for T Line Batting Pads",
+      "sheet_name": "Std Cricket Products Upload",
+      "search_column": "M",
+      "search_value": "MASTLBP",
+      "update_column": "S",
+      "target_value": "105",
+      "enabled": true
+    },
+    {
+      "name": "Update prices for C Line Batting Pads",
+      "sheet_name": "Std Cricket Products Upload",
+      "search_column": "M",
+      "search_value": "MASCLBP",
+      "update_column": "S",
+      "target_value": "70",
+      "enabled": true
+    },
+    {
+      "name": "Update prices for E Line Pro Wheel Bag",
+      "sheet_name": "Std Cricket Products Upload",
+      "search_column": "M",
+      "search_value": "MCR0130",
+      "update_column": "S",
+      "target_value": "130",
+      "enabled": true
+    },
+    {
+      "name": "Update prices for E Line Duffle Bag",
+      "sheet_name": "Std Cricket Products Upload",
+      "search_column": "M",
+      "search_value": "MCR0129",
+      "update_column": "S",
+      "target_value": "99",
+      "enabled": true
+    },
+    {
+      "name": "Update prices for C Line Wheel Bag",
+      "sheet_name": "Std Cricket Products Upload",
+      "search_column": "M",
+      "search_value": "MCR0128",
+      "update_column": "S",
+      "target_value": "85",
       "enabled": true
     }
 

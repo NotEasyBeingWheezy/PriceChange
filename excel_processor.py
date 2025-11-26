@@ -59,8 +59,19 @@ def load_configuration(config_path=None):
         sys.exit(1)
 
 def setup_logging():
-    """Set up logging to track progress and errors"""
-    log_filename = f"excel_processor_log_{datetime.now().strftime('%Y%m%d_%H%M%S')}.txt"
+    """Set up logging to track progress and errors - creates two log files"""
+    timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
+
+    # Main log file (all messages)
+    log_filename = f"excel_processor_log_{timestamp}.txt"
+
+    # Error-only log file
+    error_log_filename = f"excel_processor_errors_{timestamp}.txt"
+
+    # Clear any existing handlers
+    logging.root.handlers = []
+
+    # Create main logger
     logging.basicConfig(
         level=logging.INFO,
         format='%(asctime)s - %(levelname)s - %(message)s',
@@ -69,7 +80,20 @@ def setup_logging():
             logging.StreamHandler()
         ]
     )
-    return log_filename
+
+    # Add error-only file handler
+    error_handler = logging.FileHandler(error_log_filename)
+    error_handler.setLevel(logging.ERROR)
+    error_handler.setFormatter(logging.Formatter('%(asctime)s - %(levelname)s - %(message)s'))
+    logging.getLogger().addHandler(error_handler)
+
+    # Write header to error log
+    with open(error_log_filename, 'a') as f:
+        f.write("="*60 + "\n")
+        f.write("EXCEL PROCESSOR - ERROR LOG\n")
+        f.write("="*60 + "\n\n")
+
+    return log_filename, error_log_filename
 
 def create_backup(filepath):
     """Create a backup of the original file"""
@@ -271,6 +295,7 @@ def process_excel_with_xlwings(filepath, sheet_rules):
                 print(f"  Backup created: {os.path.basename(backup_path)}")
         except Exception as backup_err:
             print(f"  Backup warning: {backup_err}")
+            logging.error(f"Failed to create backup for {os.path.basename(filepath)}: {str(backup_err)}")
 
         # Start Excel application
         print(f"  Starting Excel")
@@ -346,8 +371,9 @@ def process_excel_with_xlwings(filepath, sheet_rules):
                     print(f"      Notice: Sheet is protected; attempting to unprotect")
                     try:
                         sheet.api.Unprotect(Password="")
-                    except Exception:
+                    except Exception as unprotect_error:
                         print(f"      Warning: Could not unprotect sheet. Updates may be skipped.")
+                        logging.error(f"Protected sheet '{sheet_name}' in {os.path.basename(filepath)} - could not unprotect: {str(unprotect_error)}")
             except Exception:
                 pass
 
@@ -389,6 +415,7 @@ def process_excel_with_xlwings(filepath, sheet_rules):
                 return True, total_updates, update_details
             except Exception as save_error:
                 print(f"  ERROR saving file: {save_error}")
+                logging.error(f"Failed to save {os.path.basename(filepath)}: {str(save_error)}")
                 return False, 0, {}
         else:
             print(f"  No changes needed")
@@ -438,8 +465,10 @@ def main():
         print("\nCannot proceed without Excel. Please install Microsoft Excel and try again.")
         return
 
-    log_file = setup_logging()
+    log_file, error_log_file = setup_logging()
     logging.info(f"Starting Excel search and update operation on {system_info}")
+    print(f"Main log: {log_file}")
+    print(f"Error log: {error_log_file}")
 
     # Get directory based on platform
     folder_paths = CONFIG.get('folder_paths', {})
@@ -588,10 +617,28 @@ def main():
                 print(f"  '{rule_name}': {count} updates")
 
     print(f"\nALL Excel features preserved!")
-    print(f"Log saved: {log_file}")
+    print(f"\nLog files created:")
+    print(f"  Main log: {log_file}")
+    print(f"  Error log: {error_log_file}")
+
+    # Write error summary to error log
+    with open(error_log_file, 'a') as f:
+        f.write("\n" + "="*60 + "\n")
+        f.write("ERROR SUMMARY\n")
+        f.write("="*60 + "\n")
+        f.write(f"Total files processed: {total_files}\n")
+        f.write(f"Successful: {successful_files}\n")
+        f.write(f"Failed: {failed_files}\n")
+        if failed_files == 0:
+            f.write("\n✓ No errors occurred during processing!\n")
+        else:
+            f.write(f"\n✗ {failed_files} file(s) encountered errors.\n")
+            f.write("See error messages above for details.\n")
 
     if failed_files > 0:
-        print(f"\n{failed_files} files failed to process. Check the log for details.")
+        print(f"\n⚠️  {failed_files} files failed to process. Check error log for details.")
+    else:
+        print(f"\n✓ All files processed successfully!")
 
 if __name__ == "__main__":
     main()

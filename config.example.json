@@ -1,0 +1,64 @@
+{
+  "general_settings": {
+    "enable_backups": false,
+    "max_cells_to_check": 50000,
+    "max_rows_to_process": 300,
+    "chunk_size_auto": true,
+    "process_delay_seconds": 1
+  },
+  "folder_paths": {
+    "windows": "C:\\Users\\YourUsername\\Desktop\\Excel Files",
+    "mac": "/Users/yourusername/Documents/Excel Files",
+    "linux": "/home/yourusername/excel_files"
+  },
+  "search_and_update_rules": [
+    {
+      "name": "Example: Update product price",
+      "sheet_name": "Products",
+      "search_column": "A",
+      "search_value": "Product-SKU-123",
+      "update_column": "E",
+      "target_value": "99.99",
+      "enabled": true
+    },
+    {
+      "name": "Example: Update product URL",
+      "sheet_name": "Products",
+      "search_column": "B",
+      "search_value": "Widget-Pro",
+      "update_column": "H",
+      "target_value": "https://example.com/widget-pro",
+      "enabled": true
+    },
+    {
+      "name": "Example: Update category",
+      "sheet_name": "Categories",
+      "search_column": "C",
+      "search_value": "Electronics",
+      "update_column": "D",
+      "target_value": "Consumer Electronics",
+      "enabled": false
+    }
+  ],
+  "_comments": {
+    "description": "Configuration file for Excel Search and Update Processor",
+    "usage": "1. Copy this file to config.json, 2. Edit the values below, 3. Run excel_processor.py",
+    "general_settings": {
+      "enable_backups": "Set to true to create backups before processing",
+      "max_rows_to_process": "Maximum number of rows to process per sheet (improves performance)",
+      "process_delay_seconds": "Delay in seconds between processing files"
+    },
+    "folder_paths": {
+      "note": "Set the folder path for your operating system. The script will automatically use the correct one."
+    },
+    "search_and_update_rules": {
+      "name": "Descriptive name for this rule (used in logs)",
+      "sheet_name": "Exact name of the Excel sheet to process",
+      "search_column": "Column letter to search for the value (A, B, C, ... Z, AA, AB, etc.)",
+      "search_value": "The value to search for in the search_column",
+      "update_column": "Column letter to update when a match is found",
+      "target_value": "The desired value. Cell will be updated only if it differs from this.",
+      "enabled": "Set to false to skip this rule without deleting it"
+    }
+  }
+}

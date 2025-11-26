@@ -1,0 +1,51 @@
+{
+  "general_settings": {
+    "enable_backups": false,
+    "max_cells_to_check": 50000,
+    "max_rows_to_process": 300,
+    "chunk_size_auto": true,
+    "process_delay_seconds": 1
+  },
+  "folder_paths": {
+    "windows": "C:\\Users\\Freddieharris\\Desktop\\Bulk Replace Test",
+    "mac": "/Users/freddieharris/Downloads/untitled folder",
+    "linux": "/path/to/excel/files"
+  },
+  "search_and_update_rules": [
+    {
+      "name": "Update prices in Standard Cricket Products",
+      "sheet_name": "Std Cricket Products Upload",
+      "search_column": "A",
+      "search_value": "Product123",
+      "update_column": "Z",
+      "target_value": "99.99",
+      "enabled": true
+    },
+    {
+      "name": "Update URLs in Product sheet",
+      "sheet_name": "Product URL formula sheet",
+      "search_column": "B",
+      "search_value": "SKU456",
+      "update_column": "R",
+      "target_value": "https://example.com/product",
+      "enabled": true
+    },
+    {
+      "name": "Update categories",
+      "sheet_name": "Sub Categories",
+      "search_column": "C",
+      "search_value": "Category Name",
+      "update_column": "S",
+      "target_value": "New Category",
+      "enabled": true
+    }
+  ],
+  "notes": {
+    "description": "Configuration file for Excel processor",
+    "search_column": "The column to search for the search_value",
+    "search_value": "The value to find in the search_column",
+    "update_column": "The column to check and potentially update in the same row",
+    "target_value": "The desired value for the update_column. If different, it will be updated.",
+    "columns": "Use column letters like 'A', 'B', 'Z', 'AA', etc."
+  }
+}

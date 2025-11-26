@@ -15,30 +15,13 @@
     {
       "name": "Update prices in Standard Cricket Products",
       "sheet_name": "Std Cricket Products Upload",
-      "search_column": "A",
-      "search_value": "Product123",
-      "update_column": "Z",
-      "target_value": "99.99",
-      "enabled": true
-    },
-    {
-      "name": "Update URLs in Product sheet",
-      "sheet_name": "Product URL formula sheet",
-      "search_column": "B",
-      "search_value": "SKU456",
-      "update_column": "R",
-      "target_value": "https://example.com/product",
-      "enabled": true
-    },
-    {
-      "name": "Update categories",
-      "sheet_name": "Sub Categories",
-      "search_column": "C",
-      "search_value": "Category Name",
+      "search_column": "M",
+      "search_value": "MASELBGP",
       "update_column": "S",
-      "target_value": "New Category",
+      "target_value": "1000",
       "enabled": true
     }
+
   ],
   "notes": {
     "description": "Configuration file for Excel processor",

@@ -76,19 +76,19 @@ def setup_logging():
         level=logging.INFO,
         format='%(asctime)s - %(levelname)s - %(message)s',
         handlers=[
-            logging.FileHandler(log_filename),
+            logging.FileHandler(log_filename, encoding='utf-8'),
             logging.StreamHandler()
         ]
     )
 
     # Add error-only file handler
-    error_handler = logging.FileHandler(error_log_filename)
+    error_handler = logging.FileHandler(error_log_filename, encoding='utf-8')
     error_handler.setLevel(logging.ERROR)
     error_handler.setFormatter(logging.Formatter('%(asctime)s - %(levelname)s - %(message)s'))
     logging.getLogger().addHandler(error_handler)
 
     # Write header to error log
-    with open(error_log_filename, 'a') as f:
+    with open(error_log_filename, 'a', encoding='utf-8') as f:
         f.write("="*60 + "\n")
         f.write("EXCEL PROCESSOR - ERROR LOG\n")
         f.write("="*60 + "\n\n")
@@ -622,7 +622,7 @@ def main():
     print(f"  Error log: {error_log_file}")
 
     # Write error summary to error log
-    with open(error_log_file, 'a') as f:
+    with open(error_log_file, 'a', encoding='utf-8') as f:
         f.write("\n" + "="*60 + "\n")
         f.write("ERROR SUMMARY\n")
         f.write("="*60 + "\n")
@@ -630,9 +630,9 @@ def main():
         f.write(f"Successful: {successful_files}\n")
         f.write(f"Failed: {failed_files}\n")
         if failed_files == 0:
-            f.write("\n✓ No errors occurred during processing!\n")
+            f.write("\n[SUCCESS] No errors occurred during processing!\n")
         else:
-            f.write(f"\n✗ {failed_files} file(s) encountered errors.\n")
+            f.write(f"\n[ERROR] {failed_files} file(s) encountered errors.\n")
             f.write("See error messages above for details.\n")
 
     if failed_files > 0:

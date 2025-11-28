@@ -142,7 +142,7 @@
       "name": "Update prices for E Line Junior Batting Pads",
       "sheet_name": "Std Cricket Products Upload",
       "search_column": "M",
-      "search_value": "MASELBP",
+      "search_value": "MASELBPJ",
       "update_column": "S",
       "target_value": "70",
       "enabled": true

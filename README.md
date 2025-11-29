@@ -221,35 +221,31 @@ Backups are saved in a `backups` subfolder with timestamps.
 
 ### macOS Permission Prompts (IMPORTANT!)
 
-If you're on macOS, you'll get "Grant Access" prompts for each Excel file.
+**Why this happens:** Excel 2016+ on macOS is sandboxed by Apple for security. **Note: macOS Excel does NOT have "Trusted Locations" like Windows Excel.**
 
-**Why this happens:** Excel 2016+ on macOS is sandboxed for security. **Note: macOS Excel does NOT have "Trusted Locations" like Windows Excel.**
+**What the script does now:**
 
-**AUTOMATIC SOLUTION (Recommended):**
+The script uses AppleScript to tell Excel to open files (instead of opening them programmatically). This should reduce prompts:
 
-The script includes an **auto-clicker** that can automatically click "Grant Access" for you!
+- **First time:** Excel will prompt "Grant Access" for your folder
+- **After that:** macOS should remember the permission and not prompt again for files in that folder
 
-When you run the script on macOS, it will ask:
+**If you still get prompts for every file:**
+
+The ONLY guaranteed solution is to move your Excel files to Excel's sandboxed container:
+
 ```
-Start automatic Grant Access clicker? (y/n):
+~/Library/Group Containers/UBF8T346G9.Office/
 ```
 
-**Type 'y'** and the script will handle all the prompts automatically!
+This is Excel's designated folder on macOS where it has unrestricted access.
 
-**Requirements for auto-clicker:**
-1. Go to: **System Settings > Privacy & Security > Accessibility**
-2. Add **Terminal** (or your Python app) to the list
-3. Enable the toggle
-4. Run the script
+**How to use it:**
+1. Move your Excel files to that folder
+2. Update the `mac` path in `config.json` to point to that folder
+3. Run the script - no prompts!
 
-**Alternative - Move Files to Sandboxed Folders:**
-
-Move your Excel files to one of these locations to avoid prompts entirely:
-- `~/Documents/` (Documents folder)
-- `~/Desktop/` (Desktop folder)
-- `~/Library/Group Containers/UBF8T346G9.Office/` (Excel's container)
-
-**Note:** Even Documents/Desktop may still prompt sometimes. The auto-clicker is the most reliable solution.
+**Reality check:** The Documents/Desktop folders may or may not work depending on your macOS version and Excel configuration. The Excel container folder is the only location that's guaranteed to work without any prompts.
 
 ### Excel Not Found
 - Ensure Microsoft Excel is installed

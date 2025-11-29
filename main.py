@@ -110,138 +110,28 @@ def create_backup(filepath):
     shutil.copy2(filepath, backup_path)
     return backup_path
 
-def start_macos_grant_access_auto_clicker():
-    """
-    Start AppleScript in background to automatically click 'Grant Access' on macOS
-    This uses UI automation to handle Excel's sandboxing permission prompts
-    Returns the subprocess if started, None otherwise
-    """
-    if platform.system() != "Darwin":
-        return None
-
-    print("\n" + "="*70)
-    print("🤖 AUTOMATIC GRANT ACCESS CLICKER")
-    print("="*70)
-    print("\nStarting automation to auto-click 'Grant Access' buttons...")
-    print("\n⚠️  IMPORTANT: This requires accessibility permissions!")
-    print("\nIf this doesn't work:")
-    print("1. Go to: System Settings > Privacy & Security > Accessibility")
-    print("2. Add Terminal (or your Python application) to allowed apps")
-    print("3. Enable the toggle for Terminal")
-    print("4. Restart this script")
-    print("="*70 + "\n")
-
-    # AppleScript to automatically click Grant Access button
-    applescript = '''
-tell application "System Events"
-    repeat
-        try
-            if exists (button "Grant Access" of window 1 of process "Microsoft Excel") then
-                click button "Grant Access" of window 1 of process "Microsoft Excel"
-                delay 0.5
-            end if
-        end try
-        delay 0.2
-    end repeat
-end tell
-'''
-
-    try:
-        # Start AppleScript in background
-        process = subprocess.Popen(
-            ['osascript', '-e', applescript],
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE
-        )
-
-        print("✓ Auto-clicker started in background!")
-        print("  It will automatically click 'Grant Access' buttons for you.\n")
-        time.sleep(1)  # Give it a moment to start
-
-        return process
-
-    except Exception as e:
-        print(f"⚠️  Could not start auto-clicker: {e}")
-        print("You'll need to manually click 'Grant Access' for each file.\n")
-        return None
-
-def print_macos_permission_info(folder_path):
-    """Print information about macOS Excel permission prompts and solutions"""
-    print("\n" + "="*70)
-    print("⚠️  macOS EXCEL PERMISSION PROMPTS")
-    print("="*70)
-    print("\nExcel for Mac is sandboxed and will prompt for file access.")
-    print("This is an Excel security feature that cannot be fully automated.")
-    print("\n📋 SOLUTIONS TO REDUCE/AVOID PROMPTS:")
-    print("\n1. MOVE FILES (Recommended):")
-    print("   Move your Excel files to one of these folders that Excel trusts:")
-    print("   • ~/Documents/")
-    print("   • ~/Desktop/")
-    print(f"\n   Current folder: {folder_path}")
-
-    print("\n2. GRANT ACCESS ONCE:")
-    print("   • Click 'Grant Access' when prompted")
-    print("   • macOS may remember your choice for future sessions")
-
-    print("\n3. USE APPLESCRIPT AUTOMATION:")
-    print("   • Enable automation in: System Settings > Privacy & Security > Automation")
-    print("   • Allow Terminal/Python to control System Events")
-    print("   • The script can then auto-click 'Grant Access' buttons")
-
-    print("\n4. ALTERNATIVE CONTAINER LOCATION:")
-    print("   • ~/Library/Group Containers/UBF8T346G9.Office/")
-    print("   (This is Excel's sandboxed container - no prompts)")
-
-    print("\n💡 NOTE: macOS Excel does NOT have 'Trusted Locations' like Windows")
-    print("="*70 + "\n")
-
 def check_macos_permissions_and_advise(folder_path):
-    """Check if folder is in a sandboxed location and provide advice"""
+    """Advise user about macOS Excel permissions"""
     if platform.system() != "Darwin":
-        return True, None
+        return True
 
-    # Check if folder is already in a trusted/sandboxed location
-    sandboxed_paths = [
-        os.path.expanduser("~/Documents"),
-        os.path.expanduser("~/Desktop"),
-        os.path.expanduser("~/Library/Group Containers/UBF8T346G9.Office")
-    ]
-
-    folder_is_trusted = any(folder_path.startswith(path) for path in sandboxed_paths)
-
-    print(f"\n⚠️  macOS detected - Excel will prompt for file access")
-    print(f"Current folder: {folder_path}")
-
-    if not folder_is_trusted:
-        print("(Files are outside typical sandboxed folders)")
-
+    print(f"\n⚠️  macOS detected")
+    print(f"Folder: {folder_path}")
     print("\n" + "="*70)
-    print("AUTOMATIC SOLUTION")
+    print("macOS EXCEL PERMISSION INFO")
     print("="*70)
-    print("\nI can start an auto-clicker to handle 'Grant Access' prompts for you!")
-    print("This will automatically click the buttons so you don't have to.")
-    print("\nRequires: Accessibility permissions for Terminal/Python")
+    print("\nExcel for Mac is sandboxed by Apple.")
+    print("\nThe script now uses AppleScript to open files in Excel first.")
+    print("Excel will prompt for permission THE FIRST TIME for this folder.")
+    print("After you click 'Grant Access' once, subsequent files should")
+    print("not prompt again (macOS remembers the permission for the folder).")
+    print("\nIf you still get prompts for every file, the only guaranteed")
+    print("solution is to move files to:")
+    print("  ~/Library/Group Containers/UBF8T346G9.Office/")
     print("="*70)
 
-    response = input("\nStart automatic Grant Access clicker? (y/n): ").strip().lower()
-
-    auto_clicker_process = None
-    if response == 'y':
-        auto_clicker_process = start_macos_grant_access_auto_clicker()
-        if auto_clicker_process:
-            print("Auto-clicker is running! Processing will continue automatically...\n")
-        else:
-            print("Auto-clicker failed. You'll need to click manually.\n")
-            cont = input("Continue with manual clicking? (y/n): ").strip().lower()
-            if cont != 'y':
-                return False, None
-    else:
-        print("\nOkay, you'll need to manually click 'Grant Access' for each file.")
-        cont = input("Continue? (y/n): ").strip().lower()
-        if cont != 'y':
-            return False, None
-
-    return True, auto_clicker_process
+    response = input("\nContinue? (y/n): ").strip().lower()
+    return response == 'y'
 
 def check_excel_availability():
     """Check if Excel is available and working"""
@@ -475,19 +365,56 @@ def process_excel_with_xlwings(filepath, sheet_rules):
 
         # Open workbook
         print(f"  Opening workbook")
-        try:
-            wb = app.books.open(
-                os.path.basename(filepath),
-                update_links=False,
-                notify=False,
-                read_only=False,
-                ignore_read_only_recommended=True,
-                add_to_mru=False,
-                local=True,
-            )
-        except Exception:
-            # Fallback to full path if needed
-            wb = app.books.open(filepath, update_links=False, notify=False)
+
+        # On macOS, use AppleScript to open the file first (prompts once per folder)
+        # then connect to it with xlwings (avoids repeated prompts)
+        if platform.system() == "Darwin":
+            try:
+                # Use AppleScript to tell Excel to open the file
+                applescript = f'''
+                tell application "Microsoft Excel"
+                    open POSIX file "{filepath}"
+                end tell
+                '''
+                subprocess.run(['osascript', '-e', applescript], check=True, capture_output=True)
+                print(f"  Opened via AppleScript")
+
+                # Give Excel a moment to open the file
+                time.sleep(0.5)
+
+                # Connect to the already-open workbook
+                filename = os.path.basename(filepath)
+                wb = app.books[filename]
+            except Exception as mac_error:
+                print(f"  AppleScript method failed: {mac_error}, trying xlwings directly")
+                # Fallback to xlwings method
+                try:
+                    wb = app.books.open(
+                        os.path.basename(filepath),
+                        update_links=False,
+                        notify=False,
+                        read_only=False,
+                        ignore_read_only_recommended=True,
+                        add_to_mru=False,
+                        local=True,
+                    )
+                except Exception:
+                    wb = app.books.open(filepath, update_links=False, notify=False)
+        else:
+            # Windows/Linux: use xlwings directly
+            try:
+                wb = app.books.open(
+                    os.path.basename(filepath),
+                    update_links=False,
+                    notify=False,
+                    read_only=False,
+                    ignore_read_only_recommended=True,
+                    add_to_mru=False,
+                    local=True,
+                )
+            except Exception:
+                # Fallback to full path if needed
+                wb = app.books.open(filepath, update_links=False, notify=False)
 
         modifications_made = False
         total_updates = 0
@@ -638,11 +565,9 @@ def main():
         print("Please update the folder path in config.json")
         return
 
-    # On macOS, check permissions and provide advice
-    auto_clicker_process = None
+    # On macOS, advise about permissions
     if system == "Darwin":
-        should_continue, auto_clicker_process = check_macos_permissions_and_advise(directory)
-        if not should_continue:
+        if not check_macos_permissions_and_advise(directory):
             return
 
     try:
@@ -789,20 +714,6 @@ def main():
         else:
             f.write(f"\n[ERROR] {failed_files} file(s) encountered errors.\n")
             f.write("See error messages above for details.\n")
-
-    # Clean up auto-clicker if it was started
-    if auto_clicker_process:
-        try:
-            print("\nStopping auto-clicker...")
-            auto_clicker_process.terminate()
-            auto_clicker_process.wait(timeout=2)
-            print("✓ Auto-clicker stopped")
-        except Exception as e:
-            print(f"Note: {e}")
-            try:
-                auto_clicker_process.kill()
-            except:
-                pass
 
     if failed_files > 0:
         print(f"\n⚠️  {failed_files} files failed to process. Check error log for details.")

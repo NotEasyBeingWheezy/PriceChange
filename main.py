@@ -109,6 +109,80 @@ def create_backup(filepath):
     shutil.copy2(filepath, backup_path)
     return backup_path
 
+def print_manual_trusted_location_instructions(folder_path):
+    """Print instructions for manually adding folder to Excel's Trusted Locations"""
+    print("\n" + "="*60)
+    print("TO AVOID PERMISSION PROMPTS:")
+    print("="*60)
+    print("Add this folder to Excel's Trusted Locations manually:")
+    print("\n1. Open Microsoft Excel")
+    print("2. Go to Excel > Preferences (or Settings)")
+    print("3. Click on 'Security & Privacy'")
+    print("4. Click on 'Trust Center Settings' or 'Trusted Locations'")
+    print("5. Click 'Add New Location'")
+    print(f"6. Add this path: {folder_path}")
+    print("7. Check 'Subfolders of this location are also trusted'")
+    print("8. Click OK to save")
+    print("\nAfter doing this once, you won't see permission prompts anymore!")
+    print("="*60 + "\n")
+
+def add_folder_to_trusted_locations(folder_path):
+    """
+    Add a folder to Excel's Trusted Locations to avoid permission prompts on macOS
+    This helps bypass the sandboxing restrictions in Excel 2016+ on macOS
+    """
+    if platform.system() != "Darwin":
+        return True  # Only needed on macOS
+
+    print(f"\nMacOS detected - attempting to configure Excel Trusted Locations...")
+
+    try:
+        # Start Excel application
+        app = xw.App(visible=False, add_book=False)
+
+        try:
+            # Access the TrustedLocations collection
+            # We'll try to add the location to the first available index
+            trusted_locs = app.api.Application.TrustedLocations
+
+            # Try to find an empty slot or append
+            for i in range(1, 21):  # Excel typically supports up to 20 trusted locations
+                try:
+                    existing = trusted_locs.Item(i)
+                    if existing.Path == folder_path:
+                        print(f"  ✓ Folder already in Trusted Locations - no prompts expected!")
+                        app.quit()
+                        return True
+                except:
+                    # This slot is empty, we can use it
+                    try:
+                        new_loc = trusted_locs.Add(folder_path)
+                        new_loc.AllowSubFolders = True
+                        print(f"  ✓ Successfully added to Trusted Locations - no prompts expected!")
+                        app.quit()
+                        return True
+                    except Exception as add_err:
+                        continue
+
+            print(f"  ⚠ Could not add to Trusted Locations automatically")
+            app.quit()
+            print_manual_trusted_location_instructions(folder_path)
+            input("Press Enter after adding the folder to Trusted Locations to continue...")
+            return True
+
+        except Exception as api_err:
+            print(f"  ⚠ Could not access Trusted Locations API automatically")
+            app.quit()
+            print_manual_trusted_location_instructions(folder_path)
+            input("Press Enter after adding the folder to Trusted Locations to continue...")
+            return True
+
+    except Exception as e:
+        print(f"  ⚠ Could not configure Trusted Locations automatically")
+        print_manual_trusted_location_instructions(folder_path)
+        input("Press Enter after adding the folder to Trusted Locations to continue...")
+        return True  # Don't fail the whole script
+
 def check_excel_availability():
     """Check if Excel is available and working"""
     try:
@@ -503,6 +577,10 @@ def main():
         print(f"Directory does not exist: {directory}")
         print("Please update the folder path in config.json")
         return
+
+    # On macOS, try to add folder to Trusted Locations to avoid permission prompts
+    if system == "Darwin":
+        add_folder_to_trusted_locations(directory)
 
     try:
         # Filter out temporary Excel files (starting with ~$)

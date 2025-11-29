@@ -219,6 +219,26 @@ Backups are saved in a `backups` subfolder with timestamps.
 
 ## Troubleshooting
 
+### macOS Permission Prompts (IMPORTANT!)
+
+If you're on macOS and get permission prompts for every Excel file:
+
+**The script will attempt to automatically add your folder to Excel's Trusted Locations.** If that fails, it will show you manual instructions.
+
+**Manual Method:**
+1. Open Microsoft Excel
+2. Go to **Excel > Preferences** (or Settings)
+3. Click on **Security & Privacy**
+4. Click on **Trust Center Settings** or **Trusted Locations**
+5. Click **Add New Location**
+6. Add your Excel files folder path
+7. Check **"Subfolders of this location are also trusted"**
+8. Click OK
+
+**Why this happens:** Excel 2016+ on macOS is sandboxed for security and requires explicit permission for files outside trusted locations. This is an Excel security feature, not a bug in the script.
+
+**Alternative solution:** Move your Excel files to a pre-trusted location like `~/Documents/` or `~/Desktop/`
+
 ### Excel Not Found
 - Ensure Microsoft Excel is installed
 - On macOS: Grant necessary permissions when prompted

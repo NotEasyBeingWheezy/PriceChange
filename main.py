@@ -370,10 +370,10 @@ def process_excel_with_xlwings(filepath, sheet_rules):
         # then connect to it with xlwings (avoids repeated prompts)
         if platform.system() == "Darwin":
             try:
-                # Use AppleScript to tell Excel to open the file
+                # Use AppleScript to tell Excel to open the file without updating links
                 applescript = f'''
                 tell application "Microsoft Excel"
-                    open POSIX file "{filepath}"
+                    open POSIX file "{filepath}" with update links no
                 end tell
                 '''
                 subprocess.run(['osascript', '-e', applescript], check=True, capture_output=True)

@@ -1,10 +1,8 @@
 {
   "general_settings": {
     "enable_backups": false,
-    "max_cells_to_check": 50000,
     "max_rows_to_process": 300,
-    "chunk_size_auto": true,
-    "process_delay_seconds": 1
+    "process_delay_seconds": 0
   },
   "folder_paths": {
     "windows": "C:\\Users\\FreddieHarris\\ExcelFiles",

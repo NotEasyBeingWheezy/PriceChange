@@ -15,6 +15,7 @@ import os
 import sys
 import shutil
 import platform
+import gc
 from datetime import datetime
 import logging
 import json
@@ -274,9 +275,14 @@ def process_sheet_with_rules(sheet, rules, max_rows_to_process=300):
         print(f"      Error analyzing sheet: {e}")
         return 0, {}
 
-def process_excel_with_xlwings(filepath, sheet_rules):
+def process_excel_with_xlwings(app, filepath, sheet_rules):
     """
     Process Excel file using xlwings with search-and-update logic
+
+    Parameters:
+        app: xlwings App instance (reused across multiple files)
+        filepath: Path to Excel file
+        sheet_rules: Dict of rules organized by sheet name
 
     sheet_rules should be a dict like:
     {
@@ -291,7 +297,6 @@ def process_excel_with_xlwings(filepath, sheet_rules):
         ]
     }
     """
-    app = None
     wb = None
 
     try:
@@ -307,39 +312,7 @@ def process_excel_with_xlwings(filepath, sheet_rules):
             print(f"  Backup warning: {backup_err}")
             logging.exception(f"Failed to create backup for {os.path.basename(filepath)}")
 
-        # Start Excel application
-        print(f"  Starting Excel")
-        app = xw.App(visible=False, add_book=False)
-
-        # Reduce prompts and speed up processing
-        try:
-            app.display_alerts = False
-            app.screen_updating = False
-            try:
-                app.api.AskToUpdateLinks = False
-            except Exception:
-                pass
-        except Exception:
-            pass
-
-        # Temporarily disable calc/events for performance
-        calc_prev = None
-        events_prev = None
-        try:
-            try:
-                calc_prev = app.api.Calculation
-                app.api.Calculation = -4135  # xlCalculationManual
-            except Exception:
-                pass
-            try:
-                events_prev = app.api.EnableEvents
-                app.api.EnableEvents = False
-            except Exception:
-                pass
-        except Exception:
-            pass
-
-        # Open workbook
+        # Open workbook (reusing existing app)
         print(f"  Opening workbook")
         try:
             wb = app.books.open(
@@ -438,23 +411,10 @@ def process_excel_with_xlwings(filepath, sheet_rules):
         return False, 0, {}
 
     finally:
-        # Clean up
+        # Clean up - only close workbook, keep app running for next file
         try:
-            # Restore calc/events
-            try:
-                if events_prev is not None:
-                    app.api.EnableEvents = events_prev
-            except Exception:
-                pass
-            try:
-                if calc_prev is not None:
-                    app.api.Calculation = calc_prev
-            except Exception:
-                pass
             if wb:
                 wb.close()
-            if app:
-                app.quit()
         except Exception as cleanup_error:
             print(f"  Cleanup warning: {cleanup_error}")
 
@@ -577,37 +537,84 @@ def main():
     except Exception:
         pass
 
-    process_delay = CONFIG.get('general_settings', {}).get('process_delay_seconds', 0)
+    # Create single Excel app instance for all files (major performance optimization)
+    print("\nInitializing Excel application (reused across all files)...")
+    app = None
+    try:
+        app = xw.App(visible=False, add_book=False)
 
-    for i, filename in enumerate(excel_files, 1):
-        filepath = os.path.join(directory, filename)
-        print(f"\nFile {i}/{total_files}: {filename}")
-        logging.info(f"Processing {i}/{total_files}: {filename}")
+        # Configure app settings once for all files
+        try:
+            app.display_alerts = False
+            app.screen_updating = False
+            try:
+                app.api.AskToUpdateLinks = False
+            except Exception:
+                pass
+        except Exception:
+            pass
 
-        file_start_time = time.time()
+        # Disable calc/events for performance (kept disabled throughout)
+        try:
+            try:
+                app.api.Calculation = -4135  # xlCalculationManual
+            except Exception:
+                pass
+            try:
+                app.api.EnableEvents = False
+            except Exception:
+                pass
+        except Exception:
+            pass
 
-        success, updates, update_details = process_excel_with_xlwings(
-            filepath,
-            sheet_rules
-        )
+        print("✓ Excel application initialized\n")
 
-        file_duration = time.time() - file_start_time
-        print(f"  Processing time: {file_duration:.1f} seconds")
+        process_delay = CONFIG.get('general_settings', {}).get('process_delay_seconds', 0)
 
-        if success:
-            successful_files += 1
-            total_updates += updates
-            # Add to overall stats
-            for rule_name, count in update_details.items():
-                if rule_name not in overall_update_stats:
-                    overall_update_stats[rule_name] = 0
-                overall_update_stats[rule_name] += count
-        else:
-            failed_files += 1
+        for i, filename in enumerate(excel_files, 1):
+            filepath = os.path.join(directory, filename)
+            print(f"\nFile {i}/{total_files}: {filename}")
+            logging.info(f"Processing {i}/{total_files}: {filename}")
 
-        # Optional delay between files (default 0 for speed)
-        if process_delay > 0:
-            time.sleep(process_delay)
+            file_start_time = time.time()
+
+            success, updates, update_details = process_excel_with_xlwings(
+                app,  # Pass existing app instance
+                filepath,
+                sheet_rules
+            )
+
+            file_duration = time.time() - file_start_time
+            print(f"  Processing time: {file_duration:.1f} seconds")
+
+            if success:
+                successful_files += 1
+                total_updates += updates
+                # Add to overall stats
+                for rule_name, count in update_details.items():
+                    if rule_name not in overall_update_stats:
+                        overall_update_stats[rule_name] = 0
+                    overall_update_stats[rule_name] += count
+            else:
+                failed_files += 1
+
+            # Optional delay between files (default 0 for speed)
+            if process_delay > 0:
+                time.sleep(process_delay)
+
+            # Periodic garbage collection to prevent memory buildup
+            if i % 10 == 0:
+                gc.collect()
+
+    finally:
+        # Clean up Excel app after all files
+        if app:
+            try:
+                print("\nShutting down Excel application...")
+                app.quit()
+                print("✓ Excel application closed")
+            except Exception as e:
+                print(f"Warning: Error closing Excel: {e}")
 
     total_duration = time.time() - start_time
 
